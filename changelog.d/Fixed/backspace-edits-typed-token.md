@@ -1,0 +1,1 @@
+- **Backspace deletes in quick add while you type a token.** After `@err`, `#Home`, `+30m`, `p1` or a link, one press deletes one character instead of first highlighting and dismissing the chip. After a space, two presses still keep the token as text (#2219).

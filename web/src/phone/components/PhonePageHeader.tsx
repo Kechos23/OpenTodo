@@ -48,7 +48,7 @@ export function PhonePageHeader({ title, meta, subtitle, leading, actions, barAc
           </span>
         ) : undefined}
         lead={back
-          ? <a href={back.href ?? '#'} aria-label={back.label} data-page-back className="flex h-11 w-11 items-center justify-center rounded-control text-default focus-visible:outline-2 focus-visible:outline-focus"
+          ? <a href={back.href ?? '#'} aria-label={back.label} data-page-back className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-default focus-visible:outline-2 focus-visible:outline-focus"
               onClick={(e) => { e.preventDefault(); back.onClick() }}><Icon name="arrow-left" size="md" /></a>
           : <IconButton icon="menu" label={t('Open menu')} onClick={onMenu} className="touch-target" />}
         trailing={<PageActions actions={barActions ? actions : undefined} overflow={overflow} menu={menu} help={help} helpInMenu />} />
@@ -56,8 +56,8 @@ export function PhonePageHeader({ title, meta, subtitle, leading, actions, barAc
         <div ref={head} className="flex min-w-0 items-center gap-2">
           {leading}
           {typeof title === 'string'
-            ? <h1 tabIndex={-1} className="min-w-0 text-display text-strong outline-none" data-page-title>{title}</h1>
-            : <h1 tabIndex={-1} className="flex min-w-0 items-center text-display text-strong outline-none" data-page-title>{title}</h1>}
+            ? <h1 tabIndex={-1} className="min-w-0 break-words hyphens-auto text-display text-strong outline-none" data-page-title>{title}</h1>
+            : <h1 tabIndex={-1} className="flex min-w-0 items-center break-words hyphens-auto text-display text-strong outline-none" data-page-title>{title}</h1>}
         </div>
         {lead && <div className="mt-0.5 text-prose text-muted" data-page-meta data-phone-summary>{lead}</div>}
         {briefing && <div className="mt-2 text-prose text-muted" data-page-briefing>{briefing}</div>}

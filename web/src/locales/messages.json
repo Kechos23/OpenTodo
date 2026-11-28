@@ -3530,6 +3530,7 @@
     "web/src/lib/method/vocabulary.json"
   ],
   "Clear": [
+    "web/src/app/OlderVersionsDialog.tsx",
     "web/src/app/bulk/BulkActions.tsx",
     "web/src/app/habits/DayMenu.tsx",
     "web/src/app/quickadd/LineDatePicker.tsx",
@@ -5291,6 +5292,7 @@
   "Details": [
     "web/src/app/AuditPanel.tsx",
     "web/src/app/DemoBanner.tsx",
+    "web/src/app/EncryptionPanel.tsx",
     "web/src/app/ImportScreen.tsx",
     "web/src/app/task-detail/TaskFacts.tsx",
     "web/src/phone/screens/PhoneTaskView.tsx"
@@ -5422,6 +5424,7 @@
     "web/src/app/completed/CompletedBar.tsx",
     "web/src/app/display/DisplayScreen.tsx",
     "web/src/app/shortcuts/Spotlight.tsx",
+    "web/src/app/task-list/ListChrome.tsx",
     "web/src/app/views/DisplayPanel.tsx"
   ],
   "Display pinned on this device": [
@@ -5478,6 +5481,7 @@
     "web/src/app/MembersPanel.tsx",
     "web/src/app/NotificationChannels.tsx",
     "web/src/app/OAuthClients.tsx",
+    "web/src/app/OlderVersionsDialog.tsx",
     "web/src/app/ProjectNote.tsx",
     "web/src/app/RefChip.tsx",
     "web/src/app/TokensSection.tsx",
@@ -8673,7 +8677,6 @@
     "web/src/app/PreferencesPanels.tsx",
     "web/src/app/ProjectActivity.tsx",
     "web/src/app/SampleNotice.tsx",
-    "web/src/app/SavedViewView.tsx",
     "web/src/app/Sidebar.tsx",
     "web/src/app/SyncScopeField.tsx",
     "web/src/app/TabBar.tsx",
@@ -8688,7 +8691,6 @@
     "web/src/app/palette/index.ts",
     "web/src/app/review/StatsView.tsx",
     "web/src/app/task-detail/ActivityTab.tsx",
-    "web/src/app/task-detail/Facets.tsx",
     "web/src/app/task-detail/HistoryTab.tsx",
     "web/src/app/task-detail/TaskDetail.tsx",
     "web/src/app/task-detail/TaskPageView.tsx",
@@ -8700,7 +8702,6 @@
     "web/src/lib/assistant.ts",
     "web/src/lib/assistantBlockData.ts",
     "web/src/lib/dashboard.ts",
-    "web/src/lib/listGroups.ts",
     "web/src/lib/pickerSources.ts",
     "web/src/lib/review.ts",
     "web/src/lib/rules/proposal.ts",
@@ -8954,6 +8955,9 @@
   ],
   "It now names everything the assistant could already read and send to the model provider, such as notes, tracked time, routines, calendar frames and attachment names. Nothing new is sent, and your consent still counts.": [
     "web/src/app/assistant/DisclosureNotice.tsx"
+  ],
+  "It replaces the key record on the server with this device’s, as version {next}. Other devices keep working and adopt it. If this device missed a passphrase change made elsewhere, its older passphrase is the one that works again.": [
+    "web/src/app/EncryptionPanel.tsx"
   ],
   "It will no longer sign you in. Your password and other passkeys keep working.": [
     "web/src/app/SecurityPanel.tsx"
@@ -11135,8 +11139,8 @@
   ],
   "Next task": [
     "web/src/app/focus/FocusView.tsx",
-    "web/src/app/task-detail/TaskPageView.tsx",
-    "web/src/phone/screens/PhoneTaskView.tsx"
+    "web/src/app/task-detail/TaskActionsMenu.tsx",
+    "web/src/app/task-detail/TaskPageView.tsx"
   ],
   "Next task of today's focus": [
     "web/src/lib/shortcuts.ts"
@@ -11534,12 +11538,15 @@
   ],
   "No project": [
     "web/src/app/DailyNotesSettings.tsx",
+    "web/src/app/SavedViewView.tsx",
     "web/src/app/filter/conditionText.ts",
     "web/src/app/notes/NoteEditor.tsx",
     "web/src/app/rules/RuleFields.tsx",
     "web/src/app/task-detail/usePropertiesModel.ts",
+    "web/src/app/task-list/useListScreen.tsx",
     "web/src/lib/pickerSources.ts",
-    "web/src/lib/rules/sentence.ts"
+    "web/src/lib/rules/sentence.ts",
+    "web/src/lib/views.ts"
   ],
   "No project is shared with this group.": [
     "web/src/app/WorkspaceGroups.tsx"
@@ -12551,6 +12558,9 @@
   ],
   "Older updates could not be loaded.": [
     "web/src/app/FeedView.tsx"
+  ],
+  "Older versions this device kept out": [
+    "web/src/app/OlderVersionsDialog.tsx"
   ],
   "Oldest": [
     "web/src/app/notes/NotesPage.tsx"
@@ -14024,8 +14034,8 @@
     "web/src/app/calendar/MonthsSpanView.tsx"
   ],
   "Previous task": [
-    "web/src/app/task-detail/TaskPageView.tsx",
-    "web/src/phone/screens/PhoneTaskView.tsx"
+    "web/src/app/task-detail/TaskActionsMenu.tsx",
+    "web/src/app/task-detail/TaskPageView.tsx"
   ],
   "Previous week": [
     "web/src/app/CalendarView.tsx",
@@ -15224,6 +15234,9 @@
   ],
   "Required for the owner": [
     "web/src/app/TwoFactorPanel.tsx"
+  ],
+  "Reschedule": [
+    "web/src/app/task-list/EarlierActions.tsx"
   ],
   "Reschedule earlier tasks…": [
     "web/src/app/palette/registry.ts"
@@ -19226,6 +19239,12 @@
   "The server sent an answer this app does not understand. Your changes stay on this device.": [
     "web/src/lib/sync.ts"
   ],
+  "The server sent an older encryption key record (version {served}, {servedDate}) than this device’s (version {mine}, {mineDate}). This device kept its own.": [
+    "web/src/app/EncryptionPanel.tsx"
+  ],
+  "The server sent older versions of {n, plural, one {# item} other {# items}}. This device kept its own.": [
+    "web/src/app/EncryptionPanel.tsx"
+  ],
   "The server still holds this text unencrypted; it is encrypted after the next sync of an unlocked device.": [
     "web/src/app/TaskRow.tsx"
   ],
@@ -19724,6 +19743,7 @@
     "web/src/lib/settingsCopy.ts"
   ],
   "This device’s clock is far off and the server keeps refusing its changes. Your changes stay on this device.": [
+    "web/src/lib/i18n/errors.ts",
     "web/src/lib/sync.ts"
   ],
   "This device’s sync state": [
@@ -19850,6 +19870,9 @@
   ],
   "This is your only way to sign in. Add a passkey or another linked account first.": [
     "web/src/app/SsoPanel.tsx"
+  ],
+  "This item changed in the meantime. Try again.": [
+    "web/src/lib/i18n/errors.ts"
   ],
   "This kind of link can never open": [
     "web/src/lib/settingsCopy.ts"
@@ -21390,6 +21413,7 @@
     "web/src/app/task-list/todayGroupDrop.ts",
     "web/src/lib/dependencies.ts",
     "web/src/lib/dnd.ts",
+    "web/src/lib/e2ee.ts",
     "web/src/lib/facets.ts",
     "web/src/lib/listGroups.ts",
     "web/src/lib/localData.ts",
@@ -21541,6 +21565,12 @@
   ],
   "Upload progress": [
     "web/src/app/RestoreSection.tsx"
+  ],
+  "Upload this device’s key record": [
+    "web/src/app/EncryptionPanel.tsx"
+  ],
+  "Upload this device’s key record?": [
+    "web/src/app/EncryptionPanel.tsx"
   ],
   "Uploading": [
     "web/src/app/task-detail/AttachmentsRow.tsx"
@@ -22400,7 +22430,8 @@
     "web/src/app/auditFormat.ts",
     "web/src/app/filter/ConditionEditor.tsx",
     "web/src/app/notes/NoteSearchField.tsx",
-    "web/src/lib/logbook.ts"
+    "web/src/lib/logbook.ts",
+    "web/src/phone/rowModel.tsx"
   ],
   "Yesterday’s line": [
     "web/src/app/review/DailyCheck.tsx"
@@ -25282,6 +25313,9 @@
   "{browser} on {os}": [
     "web/src/app/auditFormat.ts"
   ],
+  "{changes}; {r, plural, one {# repeating task stays scheduled} other {# repeating tasks stay scheduled}}": [
+    "web/src/app/bulk/BulkReview.tsx"
+  ],
   "{checked} of {count} selected": [
     "web/src/app/assistant/ChangeSetReview.tsx"
   ],
@@ -25620,6 +25654,12 @@
   ],
   "{n, plural, =0 {The Inbox is empty} one {# in the Inbox} other {# in the Inbox}}": [
     "web/src/app/method/LoopHome.tsx"
+  ],
+  "{n, plural, =1 {Moved to {target}; “{title}” repeats, so it stays scheduled} one {Moved to {target}; # repeating task stays scheduled} other {Moved to {target}; # repeating tasks stay scheduled}}": [
+    "web/src/lib/undoActions.ts"
+  ],
+  "{n, plural, =1 {“{title}” repeats, so it stays scheduled} one {# repeating task stays scheduled} other {# repeating tasks stay scheduled}}": [
+    "web/src/lib/bulk.ts"
   ],
   "{n, plural, one {# AI token} other {# AI tokens}}": [
     "web/src/app/routines/RunHistory.tsx"
@@ -26733,6 +26773,9 @@
   ],
   "{pending} pending": [
     "web/src/app/MembersPanel.tsx"
+  ],
+  "{planned} planned": [
+    "web/src/lib/time.ts"
   ],
   "{planned} planned · {tracked} tracked": [
     "web/src/lib/time.ts"
