@@ -112,7 +112,7 @@ The task panel SHALL have a Time tab listing the task's entries, newest first, e
 - **THEN** each entry names its author and the total sums both; only the author's entries carry Edit and Delete
 
 ### Requirement: Tracked time on rows and in Today
-When a task has entries its row SHALL show the tracked total in the estimate chip as `tracked / estimate` (`35m / 1h`), or `35m tracked` without an estimate; a running entry SHALL count to the current minute. Today's page header SHALL show the day's tracked total (the user's entries that started on the local day, running ones to now) beside the planned total (the estimates of the open tasks listed), both computed on the device and both live. Nothing SHALL be stored or sent for these figures.
+When a task has entries its row SHALL show the tracked total in the estimate chip as `tracked / estimate` (`35m / 1h`), or `35m tracked` without an estimate; a running entry SHALL count to the current minute. Today's page header SHALL show the day's tracked total (the user's entries that started on the local day, running ones to now) beside the planned total (the estimates of the open tasks listed), both computed on the device and both live; a total that is zero SHALL be left out, and with both zero the header shows neither. Nothing SHALL be stored or sent for these figures.
 
 #### Scenario: Chip with tracked and estimate
 - **WHEN** a task estimated at one hour has entries totalling 35 minutes
@@ -125,6 +125,10 @@ When a task has entries its row SHALL show the tracked total in the estimate chi
 #### Scenario: Offline totals
 - **WHEN** the device is offline
 - **THEN** rows and Today show the same totals from local data with no request
+
+#### Scenario: Nothing tracked yet
+- **WHEN** Today lists open tasks estimated at 3 hours and the user has tracked nothing today
+- **THEN** the header reads "3h planned", without "0m tracked"
 
 ### Requirement: Encrypted accounts
 For an account with end-to-end encryption the `note` of a time entry SHALL be encrypted on the device like a comment body, while `task_id`, `user_id`, `started_at`, `ended_at`, `device_id`, `created_at` and `deleted_at` SHALL stay plaintext. Server features that show notes (CSV export, the MCP tool) SHALL show a ciphertext note as "[encrypted]" and SHALL never fail because of it.

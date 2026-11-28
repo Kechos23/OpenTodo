@@ -13,12 +13,13 @@ const meta: Meta = { title: 'Phone/Screens/Task page' }
 export default meta
 
 let bare = ''
-const page = (id: () => string) => () => <PhoneFrame><StoryScroller><TaskPage id={id()} user={storyUser} View={PhoneTaskPage} /></StoryScroller></PhoneFrame>
+const page = (id: () => string, height?: number) => () => <PhoneFrame height={height}><StoryScroller><TaskPage id={id()} user={storyUser} View={PhoneTaskPage} /></StoryScroller></PhoneFrame>
 
 export const Seeded: StoryObj = {
   name: 'A task with facts',
   ...withSeed(async () => { await seedInbox() }),
-  render: page(() => seeded.inboxTask),
+  // The whole page down to the pinned composer: in a phone's height the Comments tab would sit just under it (phone-calm).
+  render: page(() => seeded.inboxTask, 960),
 }
 
 export const Bare: StoryObj = {

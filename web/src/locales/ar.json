@@ -7942,5 +7942,7 @@
   "The server sent older versions of {n, plural, one {# item} other {# items}}. This device kept its own.": "أرسل الخادم إصدارات أقدم من {n, plural, zero {لا عناصر} one {عنصر واحد} two {عنصرين} few {# عناصر} many {# عنصرًا} other {# عنصر}}. احتفظ هذا الجهاز بإصداراته.",
   "This item changed in the meantime. Try again.": "تغيّر هذا العنصر في هذه الأثناء. حاول مجددًا.",
   "Upload this device’s key record": "رفع سجل مفتاح هذا الجهاز",
-  "Upload this device’s key record?": "رفع سجل مفتاح هذا الجهاز؟"
+  "Upload this device’s key record?": "رفع سجل مفتاح هذا الجهاز؟",
+  "Reschedule": "إعادة الجدولة",
+  "{planned} planned": "{planned} مخطط"
 }

@@ -7942,5 +7942,7 @@
   "By weekday": "Per weekdag",
   "Up next": "Hierna",
   "Next seven days": "Komende zeven dagen",
-  "in {time}": "over {time}"
+  "in {time}": "over {time}",
+  "Reschedule": "Opnieuw plannen",
+  "{planned} planned": "{planned} gepland"
 }

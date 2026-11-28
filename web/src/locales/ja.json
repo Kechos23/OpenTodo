@@ -7942,5 +7942,7 @@
   "The server sent older versions of {n, plural, one {# item} other {# items}}. This device kept its own.": "サーバーから {n, plural, other {#件の項目}}の古いバージョンが送られました。この端末は自分のものを保持しました。",
   "This item changed in the meantime. Try again.": "この項目はその間に変更されました。もう一度お試しください。",
   "Upload this device’s key record": "この端末の鍵レコードをアップロード",
-  "Upload this device’s key record?": "この端末の鍵レコードをアップロードしますか？"
+  "Upload this device’s key record?": "この端末の鍵レコードをアップロードしますか？",
+  "Reschedule": "スケジュールを変更",
+  "{planned} planned": "計画 {planned}"
 }
