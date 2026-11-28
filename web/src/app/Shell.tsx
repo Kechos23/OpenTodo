@@ -365,7 +365,7 @@ export function Shell({ user, onLogout }: { user: User; onLogout: () => void }) 
   const content = useRef<HTMLDivElement>(null), openDrawer = useCallback(() => setSidebarOpen(true), [setSidebarOpen])
   usePageFocus(route, frame, content)
   // The phone's bottom chrome: the tab bar minimises while scrolling down, the toast sits above it (phone-v2 D5, D6).
-  const minimised = usePhoneChrome(content, phoneChrome, sidebarOpen)
+  const { minimised, sidebarSwipe } = usePhoneChrome(content, phoneChrome, sidebarOpen, openDrawer)
 
   return (
     <div className="flex h-full bg-canvas px-safe">
@@ -460,7 +460,7 @@ export function Shell({ user, onLogout }: { user: User; onLogout: () => void }) 
         )}
       </main>
       <PanelBoundary><PanelHost user={user} /></PanelBoundary>
-      {phoneChrome && <TabBar route={route} onSearch={openPalette} minimised={minimised} withAdd={addRoom || addOpen} />}
+      {phoneChrome && <TabBar route={route} onSearch={openPalette} minimised={minimised} withAdd={addRoom || addOpen} sidebarSwipe={sidebarSwipe} />}
       {(addRoom || addOpen) && <AddButton ref={addButton} open={addOpen} away={minimised && !addOpen} note={route.view === 'notes' && !addOpen}
         onClick={() => (route.view === 'notes' && !addOpen ? navigate({ view: 'notes', create: true }) : setAddOpen((v) => !v))} />}
       <QuickAddSheet open={addOpen} onClose={() => setAddOpen(false)} anchor={addButton} route={route} userId={user.id} />

@@ -1,0 +1,1 @@
+- **Open the sidebar from the Android tab bar.** When the full bar has settled, swipe inward from the small mark on its first tab.

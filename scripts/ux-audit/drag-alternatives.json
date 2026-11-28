@@ -1,6 +1,10 @@
 {
  "reason": "Every drag, resize and swipe of the web app and the way to do the same with one click or tap, without dragging (WCAG 2.2 2.5.7 Dragging movements, 2.5.1 Pointer gestures; OpenSpec change accessibility-aa D3). An element that starts one carries data-drag-id; web/src/lib/a11y/dragAlternatives.test.ts checks this map against the source. An alternative is a menu item (`item`: its id in that file's menu) or a control (`contains`: a text the file must hold). The task panel opens with a click on any task; its When control and facets set a task's dates, time, duration, section and parent.",
  "sources": [
+  { "id": "bottom-tab-sidebar", "what": "An inward touch swipe from the first tab of the full Android bar opens the sidebar.", "alternatives": [
+   { "file": "web/src/phone/components/PhonePageHeader.tsx", "contains": "label={t('Open menu')}" },
+   { "file": "web/src/app/Shell.tsx", "contains": "label={t('Open menu')}" }
+  ] },
   { "id": "task-row", "what": "A list or board row: reorder within its list, move to another section or board column, drop on a row to make it a subtask or between rows at a level chosen by moving sideways, or drop on a sidebar project or label. On touch, swipe to complete, schedule or edit the title in eligible lists. In Today grouped by project, a contextual subtask can be moved under another task or scheduled as a top-level task for today.", "alternatives": [
    { "file": "web/src/app/bulk/BulkActions.tsx", "item": "move-up" },
    { "file": "web/src/app/bulk/BulkActions.tsx", "item": "move-down" },

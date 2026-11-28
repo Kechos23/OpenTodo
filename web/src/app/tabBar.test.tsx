@@ -38,6 +38,31 @@ const bar = () => document.querySelector('[data-tab-bar]')
 const tab = (id: string) => document.querySelector<HTMLButtonElement>(`[data-tab="${id}"]`)!
 
 describe('the tab bar', () => {
+  it('opens the Android drawer on release from the first tab and keeps the selected view', async () => {
+    vi.stubGlobal('opentodoShell', { bridge: 1, platform: 'android', app: '1.11.0', capabilities: [] })
+    const r = await render(<Shell user={user} onLogout={() => {}} />)
+    await waitFor(() => !!bar())
+    await click(tab('today'))
+    await waitFor(() => location.pathname === '/today')
+    const first = tab('inbox')
+    const aside = document.querySelector('aside[data-sidebar]')!
+    const pointer = (target: EventTarget, type: string, x: number) => target.dispatchEvent(
+      new PointerEvent(type, { bubbles: true, pointerId: 1, pointerType: 'touch', isPrimary: true, clientX: x, clientY: 810 }),
+    )
+    await act(async () => {
+      pointer(first, 'pointerdown', 42)
+      pointer(first, 'pointermove', 160)
+    })
+    expect(aside.getAttribute('aria-hidden')).toBe('true')
+    await act(async () => {
+      pointer(first, 'pointerup', 160)
+      first.click()
+    })
+    expect(aside.getAttribute('aria-hidden')).toBeNull()
+    expect(location.pathname).toBe('/today')
+    await r.unmount()
+  })
+
   it('offers Inbox, Today, Upcoming and Search, marks the current view in the strong tone and is at least 44 px tall', async () => {
     const r = await render(<Shell user={user} onLogout={() => {}} />)
     await waitFor(() => document.querySelectorAll('[data-tab]').length === 4, 'the tab bar')
@@ -180,6 +205,45 @@ describe('the tab bar while the list scrolls', () => {
     await act(async () => { el.dispatchEvent(new Event('scroll')) })
   }
   const add = () => document.querySelector('[data-add-button]')!
+
+  it('only allows the Android swipe after the full bar and content are idle', async () => {
+    vi.stubGlobal('opentodoShell', { bridge: 1, platform: 'android', app: '1.11.0', capabilities: [] })
+    const r = await renderScrolling()
+    const now = vi.spyOn(performance, 'now').mockReturnValue(100)
+    const first = tab('inbox')
+    const drawer = document.querySelector('aside[data-sidebar]')!
+    const pointer = (type: string, x: number, y = 810) => first.dispatchEvent(
+      new PointerEvent(type, { bubbles: true, pointerId: 1, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y }),
+    )
+    const swipe = (from: number, to: number, y = 810, end = 'pointerup') => act(async () => {
+      pointer('pointerdown', from)
+      pointer('pointermove', to, y)
+      pointer(end, to, y)
+    })
+
+    await scrollTo(100)
+    expect(bar()!.hasAttribute('data-minimised')).toBe(true)
+    await act(async () => { pointer('pointerdown', 42); pointer('pointermove', 72) })
+    await elapse(RESTORE_AFTER_MS)
+    now.mockReturnValue(100 + RESTORE_AFTER_MS)
+    await act(async () => { pointer('pointermove', 160); pointer('pointerup', 160) })
+    expect(drawer.getAttribute('aria-hidden')).toBe('true')
+
+    await scrollTo(80)
+    expect(bar()!.hasAttribute('data-minimised')).toBe(false)
+    await swipe(42, 160)
+    expect(drawer.getAttribute('aria-hidden')).toBe('true')
+    now.mockReturnValue(100 + 2 * RESTORE_AFTER_MS)
+    await swipe(25, 160) // Between the existing edge swipe and the new tab-bar start.
+    await swipe(42, 160, 840)
+    await swipe(42, 160, 810, 'pointercancel')
+    expect(drawer.getAttribute('aria-hidden')).toBe('true')
+
+    await swipe(42, 160)
+    expect(drawer.getAttribute('aria-hidden')).toBeNull()
+    await elapse(1) // Let the released swipe's click guard expire before restoring real timers.
+    await r.unmount()
+  })
 
   it('scrolling down more than 24 px drops the labels and slides the add button out; scrolling up restores both', async () => {
     const r = await renderScrolling()

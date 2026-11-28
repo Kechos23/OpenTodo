@@ -9,13 +9,15 @@
 // page (precision-phone D3). The room the shell keeps under the content follows the
 // bar's real height as it minimises and returns (`--tab-bar-h`, issue #1908).
 import { Icon, type IconName } from '../ui'
-import { forwardRef, useLayoutEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react'
+import { forwardRef, useEffect, useLayoutEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react'
 import { tabBarDestinations } from '../lib/appearance'
 import { t, msg, translatedList } from '../lib/i18n'
 import { useUserPrefsRow } from '../lib/localData'
 import { playHaptic } from '../lib/haptics'
 import { useOpenTasks } from '../lib/liveTasks'
 import { logicalToday } from '../lib/dates'
+import { fromStartEdge } from '../lib/direction'
+import { beginSwipe, SWIPE } from './rowSwipe'
 import { requestQuickAddSheet } from './QuickAddSheet'
 import { nextTimedToday, useTabCounts } from './tabCounts'
 import { openTaskPage } from './taskTrail'
@@ -58,6 +60,8 @@ const TAB_BY_ID = Object.fromEntries(TABS.map((item) => [item.id, item]))
 export const TAB_HOLD_MS = 450
 /** The badge's largest number; more reads as this and a plus. */
 const BADGE_MAX = 99
+/** Keep the start away from Android's system Back strip. */
+const SIDEBAR_SWIPE_INSET = 32
 
 /**
  * The hold of a tab (phone-delight D7): after TAB_HOLD_MS without the finger moving away it
@@ -66,15 +70,21 @@ const BADGE_MAX = 99
 function useTabHold() {
   const held = useRef(false)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const origin = useRef({ x: 0, y: 0 })
   const cancel = () => clearTimeout(timer.current)
   return {
     held,
+    cancel,
     props: (act: (() => void) | undefined) => act ? {
       onPointerDown: (e: ReactPointerEvent) => {
         held.current = false
         if (e.button !== 0) return
         cancel()
+        origin.current = { x: e.clientX, y: e.clientY }
         timer.current = setTimeout(() => { held.current = true; playHaptic('tick'); act() }, TAB_HOLD_MS)
+      },
+      onPointerMove: (e: ReactPointerEvent) => {
+        if (Math.abs(e.clientX - origin.current.x) >= SWIPE.lockX || Math.abs(e.clientY - origin.current.y) >= SWIPE.lockY) cancel()
       },
       onPointerUp: cancel, onPointerLeave: cancel, onPointerCancel: cancel,
       // The system's long-press menu would cover what the hold opens.
@@ -83,7 +93,10 @@ function useTabHold() {
   }
 }
 
-export function TabBar({ route, onSearch, minimised = false, withAdd = false }: { route: Route; onSearch: () => void; minimised?: boolean; withAdd?: boolean }) {
+export function TabBar({ route, onSearch, minimised = false, withAdd = false, sidebarSwipe }: {
+  route: Route; onSearch: () => void; minimised?: boolean; withAdd?: boolean
+  sidebarSwipe?: { open: () => void; ready: () => boolean }
+}) {
   // Search is not a destination: it stays last, whatever order the three lists are in.
   const tabs = [...tabBarDestinations(useUserPrefsRow()).map((id) => TAB_BY_ID[id]), TAB_BY_ID.search]
   const nav = useRef<HTMLElement>(null)
@@ -97,10 +110,27 @@ export function TabBar({ route, onSearch, minimised = false, withAdd = false }: 
     // Inbox: the Inbox, with quick add open to add to it.
     inbox: () => { navigate({ view: 'inbox' }); setTimeout(() => requestQuickAddSheet(), 0) },
   }
+  const stopSwipe = useRef<(() => void) | null>(null)
+  useEffect(() => () => stopSwipe.current?.(), [])
+  const startSidebarSwipe = (e: ReactPointerEvent<HTMLElement>) => {
+    if (!sidebarSwipe || minimised || !e.isPrimary || e.pointerType !== 'touch' || fromStartEdge(e.clientX) < SIDEBAR_SWIPE_INSET) return
+    const bar = e.currentTarget
+    if (!bar.querySelector('[data-tab]')?.contains(e.target as Node)) return
+    const ready = () => bar.isConnected && !bar.hasAttribute('data-minimised') && sidebarSwipe.ready()
+    if (!ready()) return
+    stopSwipe.current?.()
+    stopSwipe.current = beginSwipe(e, {
+      canStart: () => ready() && (!holds[tabs[0].id] || !hold.held.current),
+      onLock: hold.cancel,
+      onMove: () => {},
+      onEnd: (action) => { if (action === 'right' && ready()) sidebarSwipe.open() },
+    })
+  }
   return (
-    <nav ref={nav} aria-label={t('Primary destinations')} data-tab-bar data-minimised={minimised || undefined}
+    <nav ref={nav} aria-label={t('Primary destinations')} data-tab-bar data-minimised={minimised || undefined} data-drag-id="bottom-tab-sidebar" onPointerDown={startSidebarSwipe}
       className={tabBarFrame(withAdd && !minimised)}>
-      {tabs.map((item) => {
+      {tabs.map((item, i) => {
+        const swipeStart = i === 0 && sidebarSwipe && !minimised
         const active = !!item.route && route.view === item.route.view
         const tap = item.route ? () => navigate(item.route!) : onSearch
         const onClick = () => { if (hold.held.current) { hold.held.current = false; return } tap() }
@@ -108,7 +138,8 @@ export function TabBar({ route, onSearch, minimised = false, withAdd = false }: 
         return (
           <button key={item.id} type="button" onClick={onClick} {...hold.props(holds[item.id])} data-tab={item.id} data-focus-key={`tab-${item.id}`} aria-current={active ? 'page' : undefined}
             aria-haspopup={item.id === 'search' ? 'dialog' : undefined}
-            className={`${TAB_FRAME} text-hint transition-[min-height] duration-(--duration-ui) press-selected select-none [-webkit-touch-callout:none] ${minimised ? 'min-h-10' : TAB_HEIGHT} ${active ? 'bg-selected text-strong' : 'text-muted'}`}>
+            className={`${TAB_FRAME} ${swipeStart ? 'relative touch-pan-y' : ''} text-hint transition-[min-height] duration-(--duration-ui) press-selected select-none [-webkit-touch-callout:none] ${minimised ? 'min-h-10' : TAB_HEIGHT} ${active ? 'bg-selected text-strong' : 'text-muted'}`}>
+            {swipeStart && <span aria-hidden data-sidebar-swipe-handle className="pointer-events-none absolute inset-x-0 top-0.5 mx-auto h-0.5 w-4 rounded-full bg-muted" />}
             <span className="relative flex">
               <Icon name={item.icon} size="md" />
               {/* The open count on the icon (phone-delight D7); the name says it in words. */}

@@ -2,7 +2,8 @@
 // design D6): one hook on the content scroller, not a listener per view. Down by more
 // than 24 px minimises; any scroll up, reaching the end, or 600 ms without scrolling
 // restores. Under reduced motion nothing moves, so the bar stays full.
-import { type RefObject, useEffect, useState } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
+import { shell } from '../lib/shell'
 import { DESKTOP_HEADER_QUERY, useMediaQuery } from '../ui'
 import { TAB_BAR_HEIGHT_REM } from './TabBar'
 
@@ -46,11 +47,28 @@ export function useScrollMinimised(scroller: RefObject<HTMLElement | null>, enab
  * toast's lift above the tab bar and the add button (above a sheet's bottom row while
  * one is open), published as `--toast-lift` (phone-v2 D5, D6).
  */
-export function usePhoneChrome(scroller: RefObject<HTMLElement | null>, phoneChrome: boolean, drawerOpen: boolean): boolean {
+export function usePhoneChrome(scroller: RefObject<HTMLElement | null>, phoneChrome: boolean, drawerOpen: boolean, openDrawer: () => void) {
   const desktop = useMediaQuery(DESKTOP_HEADER_QUERY)
   useEffect(() => {
     const lift = desktop ? '0px' : phoneChrome ? `${TAB_BAR_HEIGHT_REM + 1.25}rem` : '5rem'
     document.documentElement.style.setProperty('--toast-lift', lift)
   }, [desktop, phoneChrome])
-  return useScrollMinimised(scroller, phoneChrome && !drawerOpen)
+  const minimised = useScrollMinimised(scroller, phoneChrome && !drawerOpen)
+  const lastScroll = useRef(-Infinity)
+  const host = shell()
+  const android = host ? host.platform === 'android' : /Android/i.test(navigator.userAgent)
+  const canSwipe = android && phoneChrome && !drawerOpen && !desktop
+  useEffect(() => {
+    const content = scroller.current
+    if (!content || !canSwipe) return
+    // Capture nested scrollers as well. Reduced motion only controls the bar's collapse.
+    const record = () => { lastScroll.current = performance.now() }
+    content.addEventListener('scroll', record, { capture: true, passive: true })
+    return () => content.removeEventListener('scroll', record, true)
+  }, [scroller, canSwipe])
+  const sidebarSwipe = canSwipe ? {
+    open: openDrawer,
+    ready: () => performance.now() - lastScroll.current >= RESTORE_AFTER_MS,
+  } : undefined
+  return { minimised, sidebarSwipe }
 }
