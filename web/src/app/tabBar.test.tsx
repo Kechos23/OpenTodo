@@ -253,6 +253,14 @@ describe('the tab bar while the list scrolls', () => {
     expect(room()).toBe('')
   })
 
+  it('a bar that is not drawn takes no room (the calendar\'s Day and Week on a computer)', async () => {
+    // Hidden from 48 rem up, the bar's box is empty at the top of the screen: that is no room, not the whole height.
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({ height: 0, width: 0, top: 0, left: 0, right: 0, bottom: 0, x: 0, y: 0, toJSON() {} }) as DOMRect)
+    const r = await renderScrolling()
+    expect(document.documentElement.style.getPropertyValue('--tab-bar-h')).toBe('0px')
+    await r.unmount()
+  })
+
   it('never minimises under reduced motion', async () => {
     reduce = true
     const r = await renderScrolling()

@@ -38,7 +38,8 @@ function useTabBarRoom(bar: { current: HTMLElement | null }): void {
     if (!el) return
     const root = document.documentElement.style
     // From the bar's top to the screen's bottom: the bar floats, so its own height leaves out the gap under it.
-    const publish = () => { const r = el.getBoundingClientRect(); root.setProperty('--tab-bar-h', `${Math.max(0, innerHeight - r.top)}px`) }
+    // A bar that is not drawn (hidden from 48 rem up) takes no room: its box is empty, and its top of 0 would read as the whole screen.
+    const publish = () => { const r = el.getBoundingClientRect(); root.setProperty('--tab-bar-h', r.height ? `${Math.max(0, innerHeight - r.top)}px` : '0px') }
     publish()
     const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(publish) : null
     observer?.observe(el, { box: 'border-box' })

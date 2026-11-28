@@ -42,10 +42,12 @@ export function Avatar({ id, name, size = 'sm', decorative = true, src, classNam
     <span
       data-hue={avatarHue(id)}
       data-avatar-picture={picture ? true : undefined}
-      className={`relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full bg-hue-soft font-semibold text-hue ${SIZES[size]}${className ? ` ${className}` : ''}`}
-      {...(decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': name })}
+      className={`relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full bg-hue-soft font-semibold text-hue before:content-[attr(data-initials)] ${SIZES[size]}${className ? ` ${className}` : ''}`}
+      {...(decorative ? { 'aria-hidden': true, 'data-initials': initials(name) } : { role: 'img', 'aria-label': name })}
     >
-      {initials(name)}
+      {/* Decorative initials are drawn, not text: a control named by its person ("Account menu for Ada Lovelace")
+          then holds no visible text its name leaves out (WCAG 2.5.3, the sidebar's rail). */}
+      {decorative ? null : initials(name)}
       {picture && <img src={picture} alt="" draggable={false} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" onError={() => setFailed(picture)} />}
     </span>
   )

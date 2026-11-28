@@ -19,7 +19,8 @@ export function PhoneHeader({ lead, title, shown = false, trailing, bleed = fals
   return (
     <header data-phone-header data-titled={shown || undefined}
       className={`sticky top-0 z-10 flex min-h-12 items-center gap-1 px-2 pt-[max(0.25rem,var(--safe-top))] transition-colors duration-(--duration-ui) ${bleed ? '-mx-4' : ''} ${shown ? 'border-b border-soft bg-canvas/85 backdrop-blur-xl' : 'border-b border-transparent'}`}>
-      <div className="flex shrink-0 items-center">{lead}</div>
+      {/* The lead gives way before the actions: a long Back label truncates (reflow at 320 px, WCAG 1.4.10). */}
+      <div className="flex min-w-0 items-center">{lead}</div>
       <p aria-hidden={!shown} className={`flex min-w-0 flex-1 items-center justify-center gap-2 text-title text-strong transition-opacity duration-(--duration-ui) ${shown ? 'opacity-100' : 'opacity-0'}`}>
         <span className="min-w-0 truncate">{title}</span>{progress}
       </p>

@@ -1,0 +1,1 @@
+- **Large text fits a 320 px screen without scrolling sideways.** A long German page title breaks, the Help page's version line wraps, a task's Back label shortens, the time zone moves under the due time and the seven days of Habits share the row. In the collapsed sidebar the account menu's name now covers everything it shows.
