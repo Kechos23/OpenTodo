@@ -10,7 +10,7 @@ import { addDaysISO, todayISO } from '../lib/dates'
 import { createLabel } from '../lib/labels'
 import { createProject, resetDeviceId } from '../lib/ops'
 import type { User } from '../lib/types'
-import { click, minWidthPx, render, type, waitFor } from '../ui/test-utils'
+import { click, key, minWidthPx, render, type, waitFor } from '../ui/test-utils'
 import { navigate, type Route } from './router'
 import { Shell } from './Shell'
 import { setShortcutHints } from './shortcuts'
@@ -56,6 +56,42 @@ async function addFrom(route: Route, title: string) {
 }
 
 describe('Add task in the sidebar', () => {
+  it.each(['q', 'sidebar'] as const)('reveals the field behind a sticky header via %s', async (entry) => {
+    navigate({ view: 'today' })
+    const r = await render(<Shell user={user} onLogout={() => {}} />)
+    try {
+      await waitFor(() => !!button() && !!listField())
+      const input = listField()!
+      const scroller = input.closest<HTMLElement>('[data-main-scroller]')!
+      const header = input.closest('[data-page-body]')!.querySelector<HTMLElement>('[data-page-header]')!
+      // happy-dom has no layout. Give the scroll pane and its pinned header stable geometry.
+      scroller.style.overflowY = 'auto'
+      Object.defineProperty(scroller, 'scrollHeight', { value: 900 })
+      Object.defineProperty(scroller, 'clientHeight', { value: 500 })
+      scroller.getBoundingClientRect = () => new DOMRect(0, 0, 600, 500)
+      header.style.position = 'sticky'
+      header.getBoundingClientRect = () => new DOMRect(0, 0, 600, 100)
+      input.getBoundingClientRect = () => new DOMRect(20, 320 - scroller.scrollTop, 560, 40)
+      const activate = () => entry === 'q' ? key(document.body, 'q', { code: 'KeyQ' }) : click(button()!)
+
+      scroller.scrollTop = 250
+      await activate()
+      expect(document.activeElement).toBe(input)
+      expect(input.getBoundingClientRect().top).toBeGreaterThanOrEqual(100)
+      expect(scroller.scrollTop).toBeGreaterThan(0)
+
+      input.blur()
+      // Already visible, even with only one pixel below the header.
+      scroller.scrollTop = 219
+      await activate()
+      expect(document.activeElement).toBe(input)
+      expect(scroller.scrollTop).toBe(219)
+    } finally {
+      await r.unmount()
+    }
+  })
+
+
   it('Today: the list quick add, and the task is due today', async () => {
     const task = await addFrom({ view: 'today' }, 'Water the plants')
     expect(task.due?.date).toBe(todayISO())

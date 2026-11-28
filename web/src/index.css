@@ -2007,6 +2007,7 @@ html:root[data-contrast="high"] .quick-add-tint { background-color: transparent;
 /* Quick add's fields wrap (quick-add-notes D1): the field and a copy of its text share one
    grid cell, so the copy sets the height without measuring in script. The line grows to
    five lines, the notes to six, then the field scrolls; the copy scrolls with it. */
+[data-main-scroller][data-quick-add-focused] { overflow-anchor: none; }
 .quick-add-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
 .quick-add-lead { display: flex; flex-shrink: 0; align-items: center; height: calc(1lh + 1rem + 2px); }
 .quick-add-grid > * { grid-area: 1 / 1; }

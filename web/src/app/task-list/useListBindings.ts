@@ -3,6 +3,7 @@
 // signals, focus that follows the cursor and the rows' stable handlers. Everything
 // reads the latest render through refs, so each registration happens once.
 import { isFirstRow, revealRow } from './revealRow'
+import { focusQuickAdd } from './stickyQuickAdd'
 import { type RefObject, useEffect, useMemo, useRef } from 'react'
 import type { ListColumn, ListRow } from '../../lib/listGroups'
 import type { Task } from '../../lib/types'
@@ -166,7 +167,7 @@ export function useListBindings(c: BindingContext): RowActions {
       const input = quickAddRef.current
       if (!input) return false
       insertAfter.current = after
-      input.focus()
+      focusQuickAdd(input)
       return true
     },
     toggleComplete: (id, completed) => live.current.toggleComplete(id, completed),
