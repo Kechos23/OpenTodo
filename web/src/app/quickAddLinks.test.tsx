@@ -39,8 +39,19 @@ describe('the link chip', () => {
     await r.unmount()
   })
 
-  it('Backspace twice keeps the link in the title', async () => {
-    const { r, input, added, submit, chip } = await typed('Read https://example.com/post')
+  it('Backspace while typing a link deletes a character (#2219)', async () => {
+    const { r, input, chip } = await typed('Read https://example.com/pa')
+    await waitFor(() => !!chip(), 'the link chip')
+    input.setSelectionRange(input.value.length, input.value.length)
+    const e = new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true })
+    await act(async () => { input.dispatchEvent(e) })
+    expect(e.defaultPrevented).toBe(false)
+    expect(r.container.querySelector('[data-chip].ring-2')).toBeNull()
+    await r.unmount()
+  })
+
+  it('after a space, Backspace twice keeps the link in the title', async () => {
+    const { r, input, added, submit, chip } = await typed('Read https://example.com/post ')
     await waitFor(() => !!chip(), 'the link chip')
     input.setSelectionRange(input.value.length, input.value.length)
     await key(input, 'Backspace')

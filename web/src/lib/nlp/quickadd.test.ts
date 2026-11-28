@@ -62,15 +62,25 @@ describe('toTaskInput', () => {
 
 describe('chipAtCaret (Backspace highlight)', () => {
   it('picks the last chip when it ends the line and the caret is at the end', () => {
-    const v = 'Buy milk tomorrow p2'
+    const v = 'Buy milk p2 tomorrow'
     const r = parse(v, ctx)
-    expect(chipAtCaret(r.chips, v, v.length, v.length)).toBe(1)
+    expect(r.chips[chipAtCaret(r.chips, v, v.length, v.length)].kind).toBe('due')
     const spaced = 'Buy milk tomorrow p2  '
     expect(chipAtCaret(parse(spaced, ctx).chips, spaced, spaced.length, spaced.length)).toBe(1)
   })
 
+  it('leaves a token the caret still touches to Backspace (#2219); a space after it restores the highlight', () => {
+    for (const v of ['Buy milk @err', 'Fix sink #work', 'Draft +30m', 'Draft 30m/2h', 'Pay rent p1', 'Think ~deep', 'Read https://example.com/pa']) {
+      const r = parse(v, { ...ctx, energy: true, links: true })
+      expect(r.chips.length, v).toBeGreaterThan(0)
+      expect(chipAtCaret(r.chips, v, v.length, v.length), v).toBe(-1)
+      const spaced = `${v} `
+      expect(chipAtCaret(parse(spaced, { ...ctx, energy: true, links: true }).chips, spaced, spaced.length, spaced.length), spaced).toBeGreaterThanOrEqual(0)
+    }
+  })
+
   it('does nothing when the caret is elsewhere, text is selected or the line ends in plain text', () => {
-    const v = 'Buy milk tomorrow p2'
+    const v = 'Buy milk p2 tomorrow'
     const r = parse(v, ctx)
     expect(chipAtCaret(r.chips, v, 3, 3)).toBe(-1)
     expect(chipAtCaret(r.chips, v, 0, v.length)).toBe(-1)
@@ -89,7 +99,7 @@ describe('chipAtCaret (Backspace highlight)', () => {
 
 describe('dismissal bookkeeping', () => {
   it('Backspace twice: dismissing the highlighted chip keeps the text and drops the chip', () => {
-    const v = 'Buy milk tomorrow p2'
+    const v = 'Buy milk tomorrow p2 '
     const r = parse(v, ctx)
     const dismissed = dismissChip([], r.chips[chipAtCaret(r.chips, v, v.length, v.length)])
     const after = parse(v, { ...ctx, dismissed })

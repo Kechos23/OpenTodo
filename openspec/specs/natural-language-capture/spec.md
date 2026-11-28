@@ -154,7 +154,7 @@ While the user types, the client SHALL show each recognised attribute (due, proj
 - **THEN** the three tasks have the same title, due date, priority and estimate
 
 ### Requirement: Dismiss and escape parsed tokens
-The user SHALL be able to reject an interpretation: activating a chip's dismiss control, or pressing Backspace when the caret is at the end of the line and the last chip is highlighted, SHALL keep that text literally in the title and SHALL suppress re-parsing of that span until the span's text changes. Text inside double quotes SHALL never be parsed, and the quotes SHALL be removed from the saved title.
+The user SHALL be able to reject an interpretation: activating a chip's dismiss control, or pressing Backspace when the caret is at the end of the line and the last chip is highlighted, SHALL keep that text literally in the title and SHALL suppress re-parsing of that span until the span's text changes. While the caret directly follows an attribute token (`#project`, `@label`, `p1`–`p4`, `+duration`, `spent/estimate`, `~energy`) or a link (`https://…`) with no whitespace after it, the token is being typed: Backspace SHALL delete a character and SHALL neither highlight nor dismiss its chip. Text inside double quotes SHALL never be parsed, and the quotes SHALL be removed from the saved title.
 
 #### Scenario: Dismiss a false positive
 - **WHEN** the user types `Review "may" report`, or types `Review may report` and dismisses the due chip for May
@@ -165,8 +165,16 @@ The user SHALL be able to reject an interpretation: activating a chip's dismiss 
 - **THEN** no due chip reappears for `may`
 
 #### Scenario: Keyboard dismissal
-- **WHEN** the caret is at the end of the line and the user presses Backspace twice
+- **WHEN** the caret is at the end of the line, after a phrase or a space, and the user presses Backspace twice
 - **THEN** the first press highlights the last chip and the second press dismisses it, leaving the text unchanged
+
+#### Scenario: Backspace while typing a token
+- **WHEN** a label "errand" exists, the user types `Buy milk @err` with the caret at the end and presses Backspace
+- **THEN** the line reads `Buy milk @er` and no chip is highlighted; the same holds after `#Home`, `+30m`, `p1` and `Read https://example.com/pa`
+
+#### Scenario: A finished token is dismissed as before
+- **WHEN** the user types `Buy milk @errand ` (with the space) and presses Backspace twice
+- **THEN** the first press highlights the label chip and the second dismisses it, leaving the text unchanged
 
 ### Requirement: Deterministic and offline parsing
 Parsing SHALL be a pure function of the line, the reference date and time, the active languages and the project list, with no network access or randomness, so every device gets the same result. The task, its rule and its reminders SHALL be written as one local operation set, visible at once, synced when online and converging per field like any edit; a relative reminder in it SHALL carry the firing time computed from the due date in the same set.
@@ -848,7 +856,7 @@ In every quick add (the list's line, the phone's sheet, the capture screen, the 
 - **THEN** a task "Review the mockup" due tomorrow is created with one link attachment to `https://example.com/mockup` named "example.com", and a chip read `example.com` before saving
 
 #### Scenario: Dismissed link stays in the title
-- **WHEN** the user dismisses the link chip, or presses Backspace twice with the caret at the end of `Read https://example.com/post`
+- **WHEN** the user dismisses the link chip, or types `Read https://example.com/post ` (with the space) and presses Backspace twice at the end of the line
 - **THEN** the task is titled `Read https://example.com/post` and has no attachment
 
 #### Scenario: Quoted link is text
