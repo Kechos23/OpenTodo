@@ -3,7 +3,7 @@
 // panel (builder and formula) under it, the display panel for layout, grouping, order,
 // completed tasks and row properties, and live results from the view runner. A
 // dashboard is rendered by DashboardView instead.
-import { isFirstRow, revealRow } from './task-list/revealRow'
+import { useDropSelect, useRevealSelected } from './task-list/useDropSelect'
 import { blockedMap } from '../lib/dependencies'
 import { useFlowView } from '../lib/useFlow'
 import { Button, EmptyState, IconButton, PageBody, PageHeader, Dialog } from '../ui'
@@ -228,16 +228,17 @@ export function SavedViewView({ view, data }: { view: View; data: ViewData }) {
       },
     }
   }, [host])
-  // Grouped by Project in the List layout, a drop may move a task to another project or nest it (view-project-drops).
+  // Grouped by Project in the List layout, a drop may move a task to another project or nest it (view-project-drops); the no-project group's toast names its heading.
   const memberships = useMembershipMap()
   const projectGroups = useMemo<ProjectGroups | null>(() => (opts.groupBy !== 'project' || display.layout !== 'list' ? null : {
-    projectOf: (k) => (k === 'inbox' ? { id: null, name: t('Inbox') } : projectMap.has(k) ? { id: k, name: projectMap.get(k)!.name } : null),
+    projectOf: (k) => (k === 'inbox' ? { id: null, name: latestRows.current.groups.find((g) => g.key === 'inbox')?.heading || t('No project') } : projectMap.has(k) ? { id: k, name: projectMap.get(k)!.name } : null),
     canEdit: (id) => canEditTasks(roleOf(id, memberships)),
     canNest: (from, to) => scopeOf(from, memberships) === scopeOf(to, memberships),
     nest,
     depthOf: (k) => nested.get(k)?.depth ?? 0,
   }), [opts.groupBy, display.layout, projectMap, memberships, nest, nested])
-  const drag = useViewOrderDrag(host, rows, { projectGroups, ticked: bulk.ticked, openRowMenu: (tk, x, y, el) => bulk.rowProps(tk).onRowMenu(x, y, el), onDropped: setSelected })
+  const [selectDropped, wasDropped] = useDropSelect(selected, setSelected)
+  const drag = useViewOrderDrag(host, rows, { projectGroups, ticked: bulk.ticked, openRowMenu: (tk, x, y, el) => bulk.rowProps(tk).onRowMenu(x, y, el), onDropped: selectDropped })
 
   useListKeys({
     rows, selected, setSelected, openId, setOpenId, pickerFor, setPickerFor, bulk, sidePanel: true,
@@ -256,13 +257,7 @@ export function SavedViewView({ view, data }: { view: View; data: ViewData }) {
   // Group by, Order by and the direction from the keyboard (display-keys): the panel's write.
   useDisplayKeys({ value: display, groupOptions: GROUP_BY_OPTIONS, sortOptions: SORT_BY_OPTIONS, sortFields: ctx.fields, set: (patch) => updateView(view.id, displayPatch(patch)) })
 
-  useEffect(() => {
-    if (!selected) return
-    const i = selected.lastIndexOf(':')
-    const row = document.querySelector<HTMLElement>(`[data-group="${CSS.escape(selected.slice(0, i))}"] [data-task-id="${CSS.escape(selected.slice(i + 1))}"]`)
-    // Below the sticky header, and back to the very top on the first row (issue 514).
-    if (row) revealRow(row, { first: isFirstRow(row) })
-  }, [selected])
+  useRevealSelected(selected, wasDropped)
 
   const message = draftError ?? (!dirty && !result.ok ? result.error : null)
   const count = result.ok ? result.tasks.length : null

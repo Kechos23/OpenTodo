@@ -473,3 +473,43 @@ describe('dismissing a chip with the pointer', () => {
     }
   }
 })
+
+// Backspace edits a token being typed (#2219, natural-language-capture "Dismiss and escape
+// parsed tokens"): with the caret touching an `@label`, `#project`, `+estimate` or `p1`
+// token, every press deletes a character; the two-press dismissal waits for a space.
+describe('Backspace while typing a token', () => {
+  const projects = [{ id: 'p-home', name: 'Home' }]
+  const labels = [{ id: 'l-errand', name: 'errand' }]
+  /** Presses Backspace; true when the field let it delete a character. */
+  async function backspace(input: HTMLTextAreaElement): Promise<boolean> {
+    const e = new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true })
+    await act(async () => { input.dispatchEvent(e) })
+    return !e.defaultPrevented
+  }
+  const ringed = (r: { container: HTMLElement }) => r.container.querySelector('[data-chip].ring-2')
+
+  it.each(['Buy milk @err', 'Buy milk @errand', 'Fix sink #Home', 'Draft the offer +30m', 'Pay rent p1'])('`%s`: Backspace deletes, never highlights', async (line) => {
+    const r = await render(<QuickAdd placeholder="Add a task" projects={projects} labels={labels} onAdd={() => {}} />)
+    const input = r.container.querySelector('textarea')!
+    await type(input, line)
+    await waitFor(() => !!r.container.querySelector('[data-chip]'), 'the token chip')
+    input.setSelectionRange(line.length, line.length)
+    expect(await backspace(input)).toBe(true)
+    expect(ringed(r)).toBeNull()
+    await r.unmount()
+  })
+
+  it('after a space, Backspace twice still dismisses the token chip', async () => {
+    const r = await render(<QuickAdd placeholder="Add a task" labels={labels} onAdd={() => {}} />)
+    const input = r.container.querySelector('textarea')!
+    const line = 'Buy milk @errand '
+    await type(input, line)
+    await waitFor(() => !!r.container.querySelector('[data-chip="label"]'), 'the label chip')
+    input.setSelectionRange(line.length, line.length)
+    expect(await backspace(input)).toBe(false)
+    expect(ringed(r)).not.toBeNull()
+    expect(await backspace(input)).toBe(false)
+    await waitFor(() => !r.container.querySelector('[data-chip="label"]'), 'the label chip dismissed')
+    await r.unmount()
+  })
+})

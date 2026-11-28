@@ -56,6 +56,7 @@ import { afterListAdd, afterListAddMany } from './afterListAdd'
 import { addTasksUndoable } from '../../lib/pasteTasks'
 import { useListBindings } from './useListBindings'
 import { useListDrag } from './useListDrag'
+import { useDropSelect } from './useDropSelect'
 import { type AddingBelow } from './belowLine'
 import { useListModel, type ListRoute } from './useListModel'
 import { markPendingDone } from '../../lib/pendingDone'
@@ -164,7 +165,8 @@ function useOwnOrder(route: ListRoute, rows: ListRow[], groups: ListGroup[], boa
     const projectOf = (key: string) => {
       const g = latest.current.groups.find((x) => x.key === key)
       if (g?.project) return { id: g.project, name: g.heading ?? t('Project') }
-      return g && (g.key === 'inbox' || g.key.endsWith(':inbox')) ? { id: null, name: t('Inbox') } : null
+      // The group's own heading, as Today's does: a drop there keeps the date (inbox-drop-unplaces).
+      return g && (g.key === 'inbox' || g.key.endsWith(':inbox')) ? { id: null, name: g.heading ?? t('No project') } : null
     }
     return {
       projectOf,
@@ -283,7 +285,8 @@ export function useListScreen(route: ListRoute, userId?: string, userRole?: Acco
   // Manual ordering (manual-ordering): projects (editors and above) and the Inbox by positions; a label page by its own order (view-manual-order); Today and Upcoming by the day order (day-manual-order).
   const { dayOrder, dayOrderIds } = useDayOrderPage(route, m.display?.groupBy, m.dayParts, selection.ticked, upcomingCal.groups), projectManual = (route.view === 'project' && m.projectEditable) || route.view === 'inbox', ownOrder = useOwnOrder(route, rows, upcomingCal.groups, board, route.view === 'today' && m.display?.groupBy === 'project', m.nested, taskMap, dayOrder), manual = projectManual || !!ownOrder, listReorder = useListReorder(manual, ownOrder, m.listDisplay.onReorder, useListAdd(projectManual && m.treeView && !board, ui, m.toggleCollapsed))
   const sectionOfRow = useMemo(() => sectionOfRows(board, dataColumns, upcomingCal.groups), [board, dataColumns, upcomingCal.groups])
-  const drag = useListDrag({ manual, onReorder: ownOrder ? undefined : m.listDisplay.onReorder, source: { rows, groups: upcomingCal.groups, sectionOfRow, tree: m.tree, board, sectionMap, ticked: selection.ticked, onHold: (task) => { if (!contextIds.has(task.id)) holdSelect(task.id, selection, setSelectMode) }, openRowMenu: rowMenu.open, reorder: ownOrder?.reorder, groupOf: ownOrder?.groupOf, across: ownOrder?.across, readOnly: isReadOnly, today: ownOrder?.todayDrop, project: projectId }, moveToSection, onDropped: setSelectedId, onDragStart: rowMenu.dismiss })
+  const [selectDropped, wasDropped] = useDropSelect(selectedId, setSelectedId)
+  const drag = useListDrag({ manual, onReorder: ownOrder ? undefined : m.listDisplay.onReorder, source: { rows, groups: upcomingCal.groups, sectionOfRow, tree: m.tree, board, sectionMap, ticked: selection.ticked, onHold: (task) => { if (!contextIds.has(task.id)) holdSelect(task.id, selection, setSelectMode) }, openRowMenu: rowMenu.open, reorder: ownOrder?.reorder, groupOf: ownOrder?.groupOf, across: ownOrder?.across, readOnly: isReadOnly, today: ownOrder?.todayDrop, project: projectId }, moveToSection, onDropped: selectDropped, onDragStart: rowMenu.dismiss })
   // The view supplies defaults; attributes typed in the quick-add line override them.
   const withDefaults = useCallback(async (inputs: QuickAddInput[]) => {
     const place = route.view === 'place' ? await getPlace(route.id) : undefined
@@ -346,7 +349,7 @@ export function useListScreen(route: ListRoute, userId?: string, userRole?: Acco
     editInline: startInline, expandedId, setExpandedId,
   })
   // Vim's `o` inserts by project position: only where positions are the order (manual: projectManual).
-  const rowActions = useListBindings({ ...shared, manual: projectManual, setSelectMode, startDrag: drag.startDrag, insertAfter, listRoot, projectReadOnly: m.projectReadOnly, startInline, editTitle, holdDock, releaseDock, setExpandedId, openRowMenu: rowMenu.open, draggingId: drag.draggingId })
+  const rowActions = useListBindings({ ...shared, manual: projectManual, setSelectMode, startDrag: drag.startDrag, insertAfter, listRoot, wasDropped, projectReadOnly: m.projectReadOnly, startInline, editTitle, holdDock, releaseDock, setExpandedId, openRowMenu: rowMenu.open, draggingId: drag.draggingId })
 
   const { edgeOf, boardGroups, queryControl: queryFilter, queryHost, cardNotes } = useListExtras(board, m.queryFilter, projectId ? { mode: viewMode, onChoose: chooseViewMode } : null, projectId, m.currentProject?.name) // Colour by on boards, Upcoming's and each project's query filter (calendar-clarity, project-query-filter)
 
@@ -361,7 +364,7 @@ export function useListScreen(route: ListRoute, userId?: string, userRole?: Acco
   const { currentProject, currentLabel, currentPlace } = m
   // Below 768 px the list's actions sit in the shell's bar and its overflow (phone-v2 D1); in a narrow column the header's row takes the same (tablet-header-room).
   const { phone, room, ...phoneActions } = usePhoneListActions({ route, root: listRoot, userRole, rowCount: own.length, topLevelCount: own.filter((r) => r.depth === 0).length,
-    onSelectMode: () => setSelectMode(true), extraSlot: displayControl, filterKey: m.filterKey, duration: m.duration, onDuration: m.chooseDuration, queryFilter,
+    onSelectMode: () => setSelectMode(true), extraSlot: displayControl, displayInMenu: route.view !== 'completed' && !!m.listDisplay.control, filterKey: m.filterKey, duration: m.duration, onDuration: m.chooseDuration, queryFilter,
     project: currentProject && { row: currentProject, editable: m.projectEditable, viewMode, onViewMode: chooseViewMode } })
   // The Open Loops move this screen serves (open-loops "References to the method").
   const methodMove = route.view === 'inbox' ? 'catch' as const : route.view === 'someday' ? 'place' as const : undefined

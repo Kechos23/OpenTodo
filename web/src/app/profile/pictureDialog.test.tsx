@@ -89,10 +89,10 @@ describe('Avatar with a picture', () => {
     const r = await render(<Avatar id="u1" name="Ada Lovelace" src="/api/v1/users/u1/avatar?v=2" />)
     const img = document.querySelector('img')!
     expect(img.getAttribute('src')).toBe('/api/v1/users/u1/avatar?v=2')
-    expect(document.querySelector('[data-avatar-picture]')!.textContent).toBe('AL')
+    expect(document.querySelector('[data-avatar-picture]')!.getAttribute('data-initials')).toBe('AL')
     await act(async () => { img.dispatchEvent(new Event('error')) })
     expect(document.querySelector('img')).toBeNull()
-    expect(document.querySelector('[data-hue]')!.textContent).toBe('AL')
+    expect(document.querySelector('[data-hue]')!.getAttribute('data-initials')).toBe('AL')
     await r.unmount()
   })
 })

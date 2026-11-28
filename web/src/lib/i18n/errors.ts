@@ -73,6 +73,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   calendar_sync_disabled: msg('Calendar sync is not enabled on this server.'),
   calendar_unreachable: msg('The calendar server could not be used: {detail}'),
   calendar_read_only: msg('This calendar is read-only'),
+  clock_skew: msg('This device’s clock is far off and the server keeps refusing its changes. Your changes stay on this device.'),
   event_edits_off: msg('Editing events is off for this connection'),
   event_not_editable: msg('This event cannot be changed from OpenTodo'),
   event_changed: msg('The event changed in your calendar; your edit was not applied.'),
@@ -155,6 +156,9 @@ export const ERROR_MESSAGES: Record<string, string> = {
   quota_exceeded: msg('This upload would go over your attachment storage.'),
   rate_limited: msg('Too many attempts. Try again later.'),
   upstream_failed: msg('The other service could not be reached. Try again.'),
+  // iPhone push through the relay (ios-push-relay).
+  'relay-off': msg('This is not available on this server.'),
+  'relay-unreachable': msg('The other service could not be reached. Try again.'),
   reauth_required: msg('Confirm your password or a code to continue.'),
   reset_invalid: msg('This password reset link is not valid.'),
   scope_change: msg('This change would move the item out of its project’s sharing.'),
@@ -166,6 +170,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   setup_token_invalid: msg('The setup token is missing or wrong.'),
   signup_closed: msg('Sign-up is disabled on this server.'),
   smtp_disabled: msg('Outgoing email is not available on this server.'),
+  // A v2 ciphertext stamped before the field's current value (e2ee-rollback D3).
+  stale_ciphertext: msg('This item changed in the meantime. Try again.'),
   stt_not_configured: msg('This server has no speech service. Use this browser’s recognition instead.'),
   stt_unavailable: msg('The speech service did not answer. Try again, or type the task.'),
   sso_required: msg('This server requires signing in with single sign-on.'),

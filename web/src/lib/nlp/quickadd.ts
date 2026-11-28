@@ -122,10 +122,14 @@ export async function toTaskInput(
   return out
 }
 
+/** Tokens typed a character at a time (`#home`, `@call`, `p1`, `+30m`, `30m/2h`, `~deep`, a link). */
+const TOKEN_KINDS: ReadonlySet<Chip['kind']> = new Set(['project', 'label', 'priority', 'estimate', 'spent', 'energy', 'link'])
+
 /**
  * Index of the chip Backspace may highlight: the last chip, and only when its text
  * ends the line (ignoring trailing spaces) and the caret is at the very end with no
- * selection. Otherwise -1, and Backspace edits text as usual.
+ * selection. A token the caret still touches is being typed, so Backspace edits it
+ * (#2219); after whitespace it highlights as usual. Otherwise -1, and Backspace edits text.
  */
 export function chipAtCaret(chips: readonly Chip[], value: string, selStart: number | null, selEnd: number | null): number {
   if (chips.length === 0 || selStart !== value.length || selEnd !== value.length) return -1
@@ -139,7 +143,8 @@ export function chipAtCaret(chips: readonly Chip[], value: string, selStart: num
       last = i
     }
   })
-  return lastEnd === end ? last : -1
+  if (lastEnd !== end) return -1
+  return end === value.length && TOKEN_KINDS.has(chips[last].kind) ? -1 : last
 }
 
 /** Add a chip's spans to the dismissed list (deduplicated). */

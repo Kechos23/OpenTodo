@@ -23,7 +23,7 @@ Why each milestone exists, and the order inside it, is in [ROADMAP.md](../ROADMA
 
 | Change | What | Status |
 | --- | --- | --- |
-| `signed-web-app` | The installed app checks every update against a file list signed at release, so a compromised server cannot serve changed code; report-only first | In progress (25 of 40) |
+| `signed-web-app` | The installed app checks every update against a file list signed at release, so a compromised server cannot serve changed code; report-only first | In progress (28 of 40) |
 | `external-security-review` | A threat model and disclosure policy; an independent security review is optional, depending on funding | In progress (38 of 44) |
 | `caldav-verified` | CalDAV verified on real clients | In progress (6 of 16) |
 | `play-production` | Google Play production, F-Droid and reproducible builds: reproducible builds, the F-Droid metadata and the Play upload are in; the store listings wait for the owner's Play Console and F-Droid steps | In progress (15 of 18) |
@@ -61,7 +61,7 @@ Why each milestone exists, and the order inside it, is in [ROADMAP.md](../ROADMA
 | `routines-shared-notify` | A "members" recipient for Notify me in shared routines, mutable per routine | Planned |
 | `telegram-channel` | Telegram as a notification channel (postponed by the owner on 2026-11-10) | Planned |
 | `desktop-shell` | Desktop app for macOS and Windows: the embedded server plus a window, a tray icon and native notifications | Planned |
-| `ios-push-relay` | Reminders on time in the iPhone app through a push relay run by the project: content-free wake-ups, off until the owner and the user turn it on | Planned |
+| `ios-push-relay` | Reminders on time in the iPhone app through a push relay run by the project: content-free wake-ups, off until the owner and the user turn it on | In progress (9 of 29) |
 
 ## 0.17 "Calm constraints"
 
@@ -290,7 +290,7 @@ Why each milestone exists, and the order inside it, is in [ROADMAP.md](../ROADMA
 | `phone-lists` | Every task list in the phone screens, with all a list does: its menu, selection, reordering, subtasks and each list's own parts | In progress (15 of 19) |
 | `phone-all-screens` | The phone header and the phone task row on every screen of the app, so the phone screens are one interface | In progress (10 of 11) |
 | `phone-ui-default` | The phone screens are what a phone shows by default; the switch stays as the way back on a device | In progress (7 of 8) |
-| `phone-ui-only` | The phone screens are the only thing a screen narrower than 768 px shows: the "New phone screens" switch and the earlier phone layout are removed | In progress (10 of 12) |
+| `phone-ui-only` | The phone screens are the only thing a screen narrower than 768 px shows: the "New phone screens" switch and the earlier phone layout are removed | In progress (11 of 12) |
 | `shell-push` | Reminders by push to the Android app through UnifiedPush, with no Google service and no new server feature; the iPhone stays on its background refresh | Shipped in 1.5 |
 
 <!-- roadmap:end -->

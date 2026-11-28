@@ -29,7 +29,7 @@ As you type, each thing OpenTodo recognises shows up as a chip under the input a
 | Never parse some text | Put it in double quotes: `Watch "Next Friday" tomorrow` → title *Watch Next Friday*, due tomorrow. The quotes are removed from the title. |
 | Turn parsing off on this device | Settings → Capture → Quick add → **Parse natural language**. Quick add then saves the line exactly as typed. |
 
-A dismissed chip stays dismissed while you keep typing; it comes back only if you edit that word. Backspace only highlights a chip when that chip's text ends the line; otherwise Backspace deletes text as usual.
+A dismissed chip stays dismissed while you keep typing; it comes back only if you edit that word. Backspace highlights a chip only when its text ends the line after a phrase, or after a space following a token or a link; otherwise it deletes a character.
 
 ## Long titles and notes
 

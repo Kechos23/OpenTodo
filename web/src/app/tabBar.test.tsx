@@ -32,7 +32,7 @@ beforeEach(async () => {
   vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 404 })))
   navigate({ view: 'inbox' })
 })
-afterEach(() => { window.matchMedia = original; vi.unstubAllGlobals() })
+afterEach(() => { window.matchMedia = original; vi.unstubAllGlobals(); width = 390 })
 
 const bar = () => document.querySelector('[data-tab-bar]')
 const tab = (id: string) => document.querySelector<HTMLButtonElement>(`[data-tab="${id}"]`)!
@@ -141,6 +141,9 @@ describe('the tab bar', () => {
     await waitFor(() => !!document.querySelector('main'), 'the shell')
     // Rendered for the stylesheet to hide (md:hidden); the shell adds no bottom padding there.
     expect(document.querySelector('main')!.className).toContain('md:!pb-0')
+    // Nor does the content column: the hidden bar measures as the whole window, so its room
+    // left a page that fills the column (the calendar's Day and Week) 0 px tall (1.11.0).
+    expect(document.querySelector<HTMLElement>('#content')!.style.paddingBottom).toBe('')
     await r.unmount()
     width = 390
   })
@@ -188,7 +191,7 @@ describe('the tab bar while the list scrolls', () => {
     await scrollTo(60)
     expect(bar()!.getAttribute('data-minimised')).toBe('true')
     expect(tab('today').className).toContain('min-h-10')
-    expect(tab('today').querySelector('span')!.className).toContain('sr-only')
+    expect(tab('today').querySelector('[data-tab-label]')!.className).toContain('sr-only')
     expect(tab('today').textContent).toBe('Today')
     expect(add().getAttribute('data-away')).toBe('true')
     expect(add().getAttribute('tabindex')).toBe('-1')
@@ -248,6 +251,14 @@ describe('the tab bar while the list scrolls', () => {
     await r.unmount()
     // Without the bar the shell falls back to its full height again.
     expect(room()).toBe('')
+  })
+
+  it('a bar that is not drawn takes no room (the calendar\'s Day and Week on a computer)', async () => {
+    // Hidden from 48 rem up, the bar's box is empty at the top of the screen: that is no room, not the whole height.
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({ height: 0, width: 0, top: 0, left: 0, right: 0, bottom: 0, x: 0, y: 0, toJSON() {} }) as DOMRect)
+    const r = await renderScrolling()
+    expect(document.documentElement.style.getPropertyValue('--tab-bar-h')).toBe('0px')
+    await r.unmount()
   })
 
   it('never minimises under reduced motion', async () => {

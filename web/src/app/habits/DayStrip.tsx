@@ -1,7 +1,9 @@
 // The day strip of the phone's Habits screen (OpenSpec change habits-complete, design
 // D2): the seven days ending on the logical today, each with its weekday, its date
 // and a ring filled by the share of that day's habits kept. The chosen day is pressed;
-// choosing an earlier one lets the screen fix it.
+// choosing an earlier one lets the screen fix it. The seven share the row: on a 320 px
+// screen with large text each day and its ring get narrower than 44 px (past the touch
+// minimum, hence `min-w-0!`) rather than the row scrolling sideways (WCAG 1.4.10).
 import { formatDate, weekday } from '../../lib/dates'
 import type { DayProgress } from '../../lib/habitDay'
 import { t } from '../../lib/i18n'
@@ -26,11 +28,11 @@ export function DayStrip({ days, chosen, today, progressOf, onChoose }: {
         const name = p.due ? `${formatDate(d, 'full', undefined, today)}, ${t('{kept} of {of}', { kept: p.kept, of: p.due })}` : formatDate(d, 'full', undefined, today)
         return (
           <button key={d} type="button" aria-pressed={on} onClick={() => onChoose(d)} data-strip-day={d} data-chosen={on || undefined}
-            className="press-selected flex min-h-14 min-w-11 flex-1 flex-col items-center gap-0.5 rounded-control py-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus">
+            className="press-selected flex min-h-14 min-w-0! flex-1 flex-col items-center gap-0.5 rounded-control py-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus">
             {/* The name in words; the letters and the number are what it looks like (a name that holds what is seen). */}
             <span className="sr-only">{name}</span>
             <span aria-hidden className={`text-hint ${on ? 'font-semibold text-strong' : 'text-muted'}`}>{weekday(d).slice(0, 2)}</span>
-            <span aria-hidden className="relative flex h-10 w-10 items-center justify-center">
+            <span aria-hidden className="relative flex aspect-square w-full max-w-10 items-center justify-center">
               <svg viewBox="0 0 40 40" className="absolute inset-0 -rotate-90" aria-hidden="true">
                 <circle cx="20" cy="20" r={R} fill="none" strokeWidth="2.5" className={p.due ? 'stroke-(--border-color-default)' : 'stroke-transparent'} />
                 {share > 0 && <circle cx="20" cy="20" r={R} fill="none" strokeWidth="2.5" strokeLinecap="round" className="stroke-accent" strokeDasharray={`${C * share} ${C}`} data-strip-share={share.toFixed(2)} />}

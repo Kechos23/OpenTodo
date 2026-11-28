@@ -136,7 +136,7 @@ describe('the list', () => {
   it('starts with the profile card: initials, name, email and role', () => {
     const html = list(member)
     expect(html).toContain('data-profile-card')
-    expect(html).toMatch(/aria-hidden="true">S<\/span>/)
+    expect(html).toMatch(/aria-hidden="true" data-initials="S"/)
     expect(html).toContain('>Sam</p>')
     expect(html).toContain('>sam@example.com</p>')
     expect(html).toContain('Member')

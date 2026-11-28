@@ -146,7 +146,7 @@ export function TimeOfDay({ task, readOnly, zone, viewer }: { task: Task; readOn
         value={view ? selected : ('' as RowChoice)} onChange={choose}
         options={offered.map((c) => ({ id: c, label: label(c) }))} data-time-of-day />
       {view && (picking || !!time) && (
-        <div ref={line} className="flex min-h-9 items-center gap-1" data-due-time>
+        <div ref={line} className="flex min-h-9 flex-wrap items-center gap-1" data-due-time>
           {/* Emptying the time keeps the part the row shows (or Any time), as choosing it would. */}
           <TimeField label={t('Due time')} hideLabel value={time} inputClassName="w-24" disabled={readOnly}
             onChange={(tm) => { if (!tm) setPicking(false); write(tm ? { time: tm } : { part: shownPart }) }} />
