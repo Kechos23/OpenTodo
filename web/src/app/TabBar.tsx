@@ -3,10 +3,10 @@
 // destination order, then Search, and a floating add button that opens quick add as a
 // bottom sheet; the drawer opens from the top bar's menu button (precision-phone D3).
 // Both hide while a sheet is open and on the task page; tabs are 56 px tall (`TAB_HEIGHT`)
-// and sit above the bottom safe area. While the list scrolls down the bar drops its
-// labels to 40 px of icons and the button slides out (phone-v2 D6). The current tab
-// is marked in the strong text tone, not the accent, as the sidebar marks its current
-// page (precision-phone D3). The room the shell keeps under the content follows the
+// and sit above the bottom safe area. On screens that compact while scrolling,
+// the labels shrink to icons and the floating button slides out.
+// The current tab uses the strong text tone, like the current page in the sidebar
+// (precision-phone D3). The room the shell keeps under the content follows the
 // bar's real height as it minimises and returns (`--tab-bar-h`, issue #1908).
 import { Icon, type IconName } from '../ui'
 import { forwardRef, useLayoutEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react'
@@ -99,7 +99,7 @@ export function TabBar({ route, onSearch, minimised = false, withAdd = false }: 
   }
   return (
     <nav ref={nav} aria-label={t('Primary destinations')} data-tab-bar data-minimised={minimised || undefined}
-      className={tabBarFrame(withAdd && !minimised)}>
+      className={tabBarFrame(withAdd)}>
       {tabs.map((item) => {
         const active = !!item.route && route.view === item.route.view
         const tap = item.route ? () => navigate(item.route!) : onSearch
@@ -128,7 +128,7 @@ export function TabBar({ route, onSearch, minimised = false, withAdd = false }: 
   )
 }
 
-/** The floating add button above the tab bar; the sheet it opens is anchored to it. */
+/** The floating add button beside the tab bar; the sheet it opens is anchored to it. */
 /** On the Notes page it starts a note (`note`, notes-home): the one add of that phone screen. */
 export const AddButton = forwardRef<HTMLButtonElement, { onClick: () => void; open: boolean; away?: boolean; note?: boolean }>(function AddButton({ onClick, open, away = false, note = false }, ref) {
   return (

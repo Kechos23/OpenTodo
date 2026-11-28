@@ -238,6 +238,16 @@ function scrollerRoom(phoneChrome: boolean, addRoom: boolean): CSSProperties | u
   return phoneChrome ? { paddingBottom: addRoom ? `calc(${TAB_BAR_ROOM} + var(--add-room))` : TAB_BAR_ROOM } : undefined
 }
 
+function useQuickAddOpen() {
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    const unsubscribe = onQuickAddSheetRequest(() => setOpen(true))
+    void handleShellUrl(requestQuickAddSheet) // Native shell address actions.
+    return unsubscribe
+  }, [])
+  return [open, setOpen] as const
+}
+
 export function Shell({ user, onLogout }: { user: User; onLogout: () => void }) {
   const route = useRoute()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -313,8 +323,7 @@ export function Shell({ user, onLogout }: { user: User; onLogout: () => void }) 
   const [showHelp, setShowHelp] = useState(false)
   const consentPending = useConsentPending()
   // Phone navigation (app-shell): the tab bar and the add button hide while a sheet or the panel is open, and on the task page (its own bar).
-  const [addOpen, setAddOpen] = useState(false)
-  useEffect(() => { const off = onQuickAddSheetRequest(() => setAddOpen(true)); void handleShellUrl(requestQuickAddSheet); return off }, []) // and a native shell's address actions (native-shells)
+  const [addOpen, setAddOpen] = useQuickAddOpen()
   const addButton = useRef<HTMLButtonElement>(null)
   const sheetOpen = useOverlayDepth() > 0
   const [panelOpen, panelCoversPage] = [!!usePanel(), usePanelCovering()]
@@ -365,7 +374,8 @@ export function Shell({ user, onLogout }: { user: User; onLogout: () => void }) 
   const content = useRef<HTMLDivElement>(null), openDrawer = useCallback(() => setSidebarOpen(true), [setSidebarOpen])
   usePageFocus(route, frame, content)
   // The phone's bottom chrome: the tab bar minimises while scrolling down, the toast sits above it (phone-v2 D5, D6).
-  const minimised = usePhoneChrome(content, phoneChrome, sidebarOpen)
+  const minimised = usePhoneChrome(content, phoneChrome, sidebarOpen, !addRoom || route.view === 'notes')
+  const addAway = minimised && !addOpen
 
   return (
     <div className="flex h-full bg-canvas px-safe">
@@ -460,8 +470,8 @@ export function Shell({ user, onLogout }: { user: User; onLogout: () => void }) 
         )}
       </main>
       <PanelBoundary><PanelHost user={user} /></PanelBoundary>
-      {phoneChrome && <TabBar route={route} onSearch={openPalette} minimised={minimised} withAdd={addRoom || addOpen} />}
-      {(addRoom || addOpen) && <AddButton ref={addButton} open={addOpen} away={minimised && !addOpen} note={route.view === 'notes' && !addOpen}
+      {phoneChrome && <TabBar route={route} onSearch={openPalette} minimised={minimised} withAdd={(addRoom || addOpen) && !addAway} />}
+      {(addRoom || addOpen) && <AddButton ref={addButton} open={addOpen} away={addAway} note={route.view === 'notes' && !addOpen}
         onClick={() => (route.view === 'notes' && !addOpen ? navigate({ view: 'notes', create: true }) : setAddOpen((v) => !v))} />}
       <QuickAddSheet open={addOpen} onClose={() => setAddOpen(false)} anchor={addButton} route={route} userId={user.id} />
       {showHelp && <PanelBoundary><Suspense fallback={null}><ShortcutHelp onClose={() => setShowHelp(false)} vim={vim} extraSections={vim && vimHelp ? [vimHelp] : []}

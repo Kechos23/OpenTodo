@@ -11,6 +11,7 @@ import { applyOps, createTask, resetDeviceId } from '../lib/ops'
 import type { User } from '../lib/types'
 import { click, key, render, minWidthPx, waitFor } from '../ui/test-utils'
 import { openTaskPanel, resetPanel } from './panel'
+import { tabBarFrame } from './phoneFrame'
 import { navigate } from './router'
 import { Shell } from './Shell'
 import { RESTORE_AFTER_MS } from './useScrollDirection'
@@ -181,25 +182,58 @@ describe('the tab bar while the list scrolls', () => {
   }
   const add = () => document.querySelector('[data-add-button]')!
 
-  it('scrolling down more than 24 px drops the labels and slides the add button out; scrolling up restores both', async () => {
+  it('keeps the labels and Add task in place while scrolling a task list', async () => {
     const r = await renderScrolling()
-    await scrollTo(10)
-    expect(bar()!.hasAttribute('data-minimised')).toBe(false)
-    await scrollTo(60)
-    expect(bar()!.getAttribute('data-minimised')).toBe('true')
-    expect(tab('today').className).toContain('min-h-10')
-    expect(tab('today').querySelector('[data-tab-label]')!.className).toContain('sr-only')
-    expect(tab('today').textContent).toBe('Today')
-    expect(add().getAttribute('data-away')).toBe('true')
-    expect(add().getAttribute('tabindex')).toBe('-1')
-    await scrollTo(40)
-    expect(bar()!.hasAttribute('data-minimised')).toBe(false)
-    expect(tab('today').className).toContain('min-h-14')
-    expect(add().hasAttribute('data-away')).toBe(false)
-    await r.unmount()
+    try {
+      for (const y of [10, 100, 180, 120, 2400]) {
+        await scrollTo(y)
+        expect(bar()!.hasAttribute('data-minimised')).toBe(false)
+        expect(bar()!.className).toBe(tabBarFrame(true))
+        expect(tab('today').className).toContain('min-h-14')
+        expect(tab('today').querySelector('[data-tab-label]')!.className).not.toContain('sr-only')
+        expect(add().hasAttribute('data-away')).toBe(false)
+        expect(add().hasAttribute('tabindex')).toBe(false)
+      }
+    } finally {
+      await r.unmount()
+    }
+  })
+
+  it('opens Quick Add from the full bar after scrolling Today', async () => {
+    navigate({ view: 'today' })
+    const r = await renderScrolling()
+    try {
+      await scrollTo(100)
+      expect(bar()!.hasAttribute('data-minimised')).toBe(false)
+      expect(add().getAttribute('aria-label')).toBe('Add task')
+      expect(add().hasAttribute('aria-hidden')).toBe(false)
+      await click(add())
+      expect(document.querySelector('[data-quick-add-sheet] textarea')).not.toBeNull()
+    } finally {
+      await r.unmount()
+    }
+  })
+
+  it('still gives the compact bar the full width on Notes and Settings', async () => {
+    navigate({ view: 'notes' })
+    const r = await renderScrolling()
+    try {
+      expect(add().getAttribute('aria-label')).toBe('New note')
+      await scrollTo(100)
+      expect(bar()!.hasAttribute('data-minimised')).toBe(true)
+      expect(add().hasAttribute('data-away')).toBe(true)
+      expect(tab('today').querySelector('[data-tab-label]')!.className).toContain('sr-only')
+      expect(bar()!.className).toBe(tabBarFrame(false))
+      await act(async () => { navigate({ view: 'settings' }) })
+      expect(add()).toBeNull()
+      expect(bar()!.className).toBe(tabBarFrame(false))
+    } finally {
+      await r.unmount()
+    }
   })
 
   it('comes back 600 ms after the scroll stops, and at the end of the list', async () => {
+    navigate({ view: 'notes' })
     const r = await renderScrolling()
     await scrollTo(100)
     expect(bar()!.getAttribute('data-minimised')).toBe('true')
@@ -217,6 +251,7 @@ describe('the tab bar while the list scrolls', () => {
   })
 
   it('the room under the content follows the bar as it minimises and returns (#1908)', async () => {
+    navigate({ view: 'notes' })
     // The bar's box as the browser lays it out: 56 px tabs, 44 px minimised on a touch screen, 34 px of safe area.
     // Only the observers watching the bar are called back, as a browser would.
     const observers: { cb: () => void; targets: Element[] }[] = []
@@ -251,6 +286,7 @@ describe('the tab bar while the list scrolls', () => {
   })
 
   it('never minimises under reduced motion', async () => {
+    navigate({ view: 'notes' })
     reduce = true
     const r = await renderScrolling()
     await scrollTo(100)

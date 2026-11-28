@@ -37,3 +37,5 @@ A folded project counts its sub-projects too; unfolded, each shows its own. A pr
 Switch a More destination on to show it next to Inbox and Today; it takes its place in the list.
 
 On a phone the tab bar shows Inbox, Today and Upcoming in this same order, with Search last. The drawer lists the other destinations in that order and does not repeat the three. With nothing reordered, the bar is Inbox, Today, Upcoming, Search. Under the full [Open Loops method](method/places.md) the sidebar follows the method, so the list waits, kept, until you choose another mode; the phone bar still uses the saved order. When two devices change the order offline, the one written last wins, whole.
+
+On task screens that offer **Add task**, the full tab bar and its labels stay visible while you scroll. The **Add task** button stays beside the bar and opens Quick Add.
